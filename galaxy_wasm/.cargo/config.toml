@@ -1,0 +1,4 @@
+[target.wasm32-unknown-unknown]
+# simd128 has no runtime feature detection on wasm (unlike x86 AVX/SSE) -
+# it must be enabled at compile time or the SIMD intrinsics won't compile.
+rustflags = ["-C", "target-feature=+simd128"]

@@ -1,0 +1,75 @@
+<!doctype html>
+<canvas id="game"></canvas>
+<script>
+const BACKGROUND = "#101010"
+const FOREGROUND = "#50FF50"
+
+game.width = 1000
+game.height = 1000
+const ctx = game.getContext("2d")
+
+function clear() {
+    ctx.fillStyle = BACKGROUND
+    ctx.fillRect(0, 0, game.width, game.height)
+}
+
+const POINT_SIZE = 2;
+
+// Batches every particle into one Path2D and does a single fill() call,
+// instead of N separate fillStyle-set + fillRect calls (which dominated
+// frame time far more than the wasm tick() itself did).
+function points(xs, ys, n) {
+    const path = new Path2D();
+    const s = POINT_SIZE;
+    for (let i = 0; i < n; ++i) {
+        // -1..1 => 0..2 => 0..1 => 0..w, inlined to avoid an {x,y} alloc per particle
+        const sx = (xs[i] + 1)/2*game.width;
+        const sy = (1 - (ys[i] + 1)/2)*game.height;
+        path.rect(sx - s/2, sy - s/2, s, s);
+    }
+    ctx.fillStyle = FOREGROUND;
+    ctx.fill(path);
+}
+
+let fps = 0;
+let lastFrameTime = performance.now();
+
+function drawFps() {
+    // exponential moving average so the number doesn't jitter every frame
+    const now = performance.now();
+    const instantFps = 1000 / (now - lastFrameTime);
+    lastFrameTime = now;
+    fps += (instantFps - fps) * 0.1;
+
+    ctx.font = "16px monospace";
+    ctx.fillStyle = FOREGROUND;
+    ctx.fillText(`${fps.toFixed(0)} FPS`, 10, 20);
+}
+
+const FPS = 60;
+const N = 2000;
+
+WebAssembly.instantiateStreaming(fetch("output.wasm"), {})
+    .then(({instance}) => {
+        const { init, tick, x_ptr, y_ptr, len, memory } = instance.exports;
+
+        init(N, 42);
+        const xPtr = x_ptr();
+        const yPtr = y_ptr();
+        const n = len();
+
+        function frame() {
+            tick();
+            // Struct-of-Arrays: x and y are each their own contiguous buffer now,
+            // so no interleaved stride math needed to read them.
+            const xs = new Float32Array(memory.buffer, xPtr, n);
+            const ys = new Float32Array(memory.buffer, yPtr, n);
+
+            clear();
+            points(xs, ys, n);
+            drawFps();
+            setTimeout(frame, 1000/FPS);
+        }
+        setTimeout(frame, 1000/FPS);
+    });
+</script>
