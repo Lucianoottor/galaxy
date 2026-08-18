@@ -11,7 +11,7 @@ Barnes-Hut quadtree for O(n log n) performance.
 ## Quick Start
 
 ```console
-$ git clone <repo>
+$ git clone https://github.com/Lucianoottor/galaxy.git
 $ cd galaxy_wasm
 $ ./build.sh
 $ python3 src/server.py
