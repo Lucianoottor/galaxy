@@ -1,5 +1,9 @@
 # Galaxy WASM
 
+<div align="center">
+  <video src="public/galaxy.mp4" autoplay loop muted playsinline></video>
+</div>
+
 N-body gravitational simulation in Rust, compiled to WebAssembly with SIMD.
 
 Barnes-Hut quadtree for O(n log n) performance.
