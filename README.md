@@ -1,7 +1,7 @@
 # Galaxy WASM
 
 <div align="center">
-  <video src="public/galaxy.mp4" autoplay loop muted playsinline></video>
+  <img src="public/galaxy.gif" alt="Galaxy WASM simulation" />
 </div>
 
 N-body gravitational simulation in Rust, compiled to WebAssembly with SIMD.
