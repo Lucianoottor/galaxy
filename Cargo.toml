@@ -1,8 +1,11 @@
 [package]
-name = "galaxy"
+name = "galaxy_wasm"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
-glam = "0.33.3"
-rand = "0.10.2"
+libm = "0.2"
+dlmalloc = { version = "0.2", features = ["global"] }
